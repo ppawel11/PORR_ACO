@@ -52,6 +52,10 @@ std::vector<std::shared_ptr<Vertex>> Graph::getNeighbours(int node_id) const{
     return result;
 }
 
+std::shared_ptr<Vertex> Graph::getNode(int node_id) {
+    return nodes[node_id];
+}
+
 std::shared_ptr<Graph> readGraphFromFile(const std::string& file_name)
 {
     std::ifstream infile(file_name);

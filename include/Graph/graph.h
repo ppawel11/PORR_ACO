@@ -31,6 +31,7 @@ public:
     void addNode(std::shared_ptr<Vertex> node);
     void connectNodes(int source_id, int target_id);
     bool hasNode(int node_id) const;
+    std::shared_ptr<Vertex> getNode(int node_id);
     std::vector<std::shared_ptr<Vertex>> getNeighbours(int node_id) const;
 };
 
