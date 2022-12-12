@@ -56,6 +56,14 @@ std::shared_ptr<Vertex> Graph::getNode(int node_id) {
     return nodes[node_id];
 }
 
+const std::unordered_map<int, std::shared_ptr<Vertex>> &Graph::getNodes() const {
+    return nodes;
+}
+
+const std::vector<std::shared_ptr<Edge>> &Graph::getEdges() const {
+    return edges;
+}
+
 std::shared_ptr<Graph> readGraphFromFile(const std::string& file_name)
 {
     std::ifstream infile(file_name);

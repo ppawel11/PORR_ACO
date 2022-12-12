@@ -1,10 +1,12 @@
 #include <iostream>
 #include "../include/RoutingTableGenerator/RoutingTableGenerator.h"
-#include "../include/Algorithms/dumb_algorithm.h"
+#include "../include/Algorithms/aco.h"
 
 int main() {
+    srand(0);
+
     auto graph = readGraphFromFile("../config/small_network.txt");
-    std::shared_ptr<Algorithm> algorithm = std::make_shared<DumbAlgorithm>();
+    std::shared_ptr<Algorithm> algorithm = std::make_shared<ACO>(10, 10, 0.5, 0.5, 0.5);
 
     RoutingTableGenerator routing_table_generator(graph, algorithm);
 

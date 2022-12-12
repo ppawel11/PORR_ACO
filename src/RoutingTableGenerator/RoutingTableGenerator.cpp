@@ -6,12 +6,19 @@ std::vector<RoutingPair> RoutingTableGenerator::generateRoutingTableTo(const int
     std::vector<RoutingPair> result = {};
     result.reserve(shortest_paths.size());
 
-    for(const auto& vertex_and_path : shortest_paths)
+    for(const auto& [vertex,path] : shortest_paths)
     {
-        if(vertex_and_path.second.empty())
+        if(path.empty())
             throw std::runtime_error("Empty path");
-        
-        result.emplace_back(vertex_and_path.first, vertex_and_path.second[0]);
+
+        if(path[0]->getId() == server_id)
+            result.emplace_back(vertex, path[0]);
+        else
+        {
+            if(path.size() < 2 )
+                throw std::runtime_error("Path too short");
+            result.emplace_back(vertex, path[1]);
+        }
     }
 
     return result;
