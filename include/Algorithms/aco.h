@@ -14,8 +14,7 @@ class Ant {
 
 public:
     Ant(float alpha, float beta): alpha{alpha}, beta{beta} {};
-    Path
-    find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id, const PheromoneTable &pheromone_table);
+    Path find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id, const PheromoneTable &pheromone_table);
 
 private:
     static std::shared_ptr<Vertex> chooseNextVertex(
@@ -24,6 +23,7 @@ private:
 };
 
 class ACO: public Algorithm{
+protected:
     int number_of_ants_per_cycle;
     int number_of_cycles;
     float initial_pheromons_amount;
@@ -35,8 +35,8 @@ public:
     ACO(int n, int m, float a, float q, float p): number_of_ants_per_cycle{n}, number_of_cycles{m}, initial_pheromons_amount{p}, alpha{a}, evaporation_param{q} {};
     PathsToTarget computePaths(std::shared_ptr<Graph> graph, int server_id) override;
 
-private:
-    Path computePath(const std::shared_ptr<Graph>& graph, int server_id, int starting_point_id);
+protected:
+    virtual Path computePath(const std::shared_ptr<Graph>& graph, int server_id, int starting_point_id);
     PheromoneTable initPheromoneTable(const std::shared_ptr<Graph>& graph) const;
     void
     updatePheromoneTable(PheromoneTable &phermone_table, const Path &best_path, const std::vector<Path> &other_found_paths);
