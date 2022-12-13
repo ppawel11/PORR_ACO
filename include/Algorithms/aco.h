@@ -40,8 +40,7 @@ public:
 protected:
     virtual Path computePath(const std::shared_ptr<Graph>& graph, int server_id, int starting_point_id);
     PheromoneTable initPheromoneTable(const std::shared_ptr<Graph>& graph) const;
-    void
-    updatePheromoneTable(PheromoneTable &phermone_table, const Path &best_path, const std::vector<Path> &other_found_paths);
+    void updatePheromoneTable(PheromoneTable &phermone_table, const Path &best_path, const std::vector<Path> &other_found_paths);
 };
 
 #endif //PROJEKT_ACO_H
