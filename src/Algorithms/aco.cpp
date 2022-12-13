@@ -76,13 +76,28 @@ void ACO::updatePheromoneTable(PheromoneTable &phermone_table, const Path &path)
     }
 }
 
-std::shared_ptr<Vertex> Ant::chooseNextVertex(const std::shared_ptr<Vertex> &vertex_of_origin,
-                                              const std::vector<std::shared_ptr<Vertex>> &neighbours,
-                                              const PheromoneTable &pheromone_table)
+std::shared_ptr<Vertex> Ant::chooseNextVertex(const std::vector<std::shared_ptr<Edge>> &possible_edges, const PheromoneTable &pheromone_table)
 {
-    //todo: legit selecting next vertex based on pheromones
-    int neigh_id = rand() % neighbours.size();
-    return neighbours[neigh_id];
+    int sum_of_weight = 0;
+
+    for(const std::shared_ptr<Edge>& edge : possible_edges)
+    {
+        sum_of_weight += pheromone_table.at(edge) * 100.0;
+    }
+
+    //todo: better random number generation
+    int random_number = rand() % sum_of_weight;
+
+    for(const std::shared_ptr<Edge>& edge : possible_edges)
+    {
+        if(random_number < pheromone_table.at(edge)*100.0)
+        {
+            return edge->target;
+        }
+        random_number -= pheromone_table.at(edge) * 100.0;
+    }
+
+    throw std::runtime_error("Random next vertex choice failure.");
 }
 
 
@@ -104,7 +119,18 @@ void Ant::find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr
 
     while(count_of_path_resets < 10)
     {
-        auto next_vertex = chooseNextVertex(path.back(), graph->getNeighbours(path.back()->getId()), pheromone_table);
+        auto next_possible_edges = graph->getEdgesFromNode(path.back()->getId());
+        if(path.size() > 2)
+            next_possible_edges.erase(std::remove_if(next_possible_edges.begin(), next_possible_edges.end(), [&path](const auto& edge){ return edge->target->getId() == path.rbegin()[1]->getId(); }), next_possible_edges.end() );
+        if(next_possible_edges.empty())
+        {
+            path.resize(1);
+            count_of_deleted_cycles = 0;
+            count_of_path_resets++;
+            continue;
+        }
+
+        auto next_vertex = chooseNextVertex(next_possible_edges, pheromone_table);
 
         if(next_vertex->getId() == server_node_id)
         {
@@ -114,15 +140,17 @@ void Ant::find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr
         }
 
         auto same_vertex = std::find_if(path.begin(), path.end(), [&next_vertex](const auto& vertex_in_path){ return vertex_in_path->getId() == next_vertex->getId(); });
+
         if(same_vertex != std::end(path))
         {
             path.erase(same_vertex+1, path.end());
             count_of_deleted_cycles++;
-            if( count_of_deleted_cycles >= 8)
+            if( count_of_deleted_cycles >= 3)
             {
                 path.resize(1);
                 count_of_deleted_cycles = 0;
                 count_of_path_resets++;
+                continue;
             }
         }
         else

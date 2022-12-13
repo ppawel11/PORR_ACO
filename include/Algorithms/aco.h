@@ -22,9 +22,9 @@ public:
             std::function<void(const Path)> finished_callback);
 
 private:
-    std::shared_ptr<Vertex> chooseNextVertex(const std::shared_ptr<Vertex> &vertex_of_origin,
-                                             const std::vector<std::shared_ptr<Vertex>> &neighbours,
-                                             const PheromoneTable &pheromone_table);
+    std::shared_ptr<Vertex> chooseNextVertex(
+            const std::vector<std::shared_ptr<Edge>> &possible_edges,
+            const PheromoneTable &pheromone_table);
 };
 
 class ACO: public Algorithm{
