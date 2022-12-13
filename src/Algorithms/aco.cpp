@@ -20,22 +20,30 @@ PathsToTarget ACO::computePaths(std::shared_ptr<Graph> graph, int server_id) {
 Path ACO::computePath(const std::shared_ptr<Graph> &graph, int server_id, int starting_point_id) {
     auto pheromone_table = initPheromoneTable(graph);
     auto starting_point = graph->getNode(starting_point_id);
+
     auto current_best_path = Path();
+    std::vector<Path> found_paths = {};
 
     for(int cycle_id = 0; cycle_id < number_of_cycles; ++cycle_id)
     {
         for(int ant_id = 0; ant_id < number_of_ants_per_cycle; ++ant_id)
         {
             auto ant = Ant(alpha, beta);
-            ant.find_server(graph, starting_point, server_id, pheromone_table, [&current_best_path](const Path best_found_path)
-                {
-                    if(best_found_path.empty()) return;
-                    if(current_best_path.empty() || best_found_path.size() < current_best_path.size()) current_best_path = best_found_path;
-                }
-            );
+            auto best_found_path = ant.find_server(graph, starting_point, server_id, pheromone_table);
+
+            if(best_found_path.empty()) break;
+            if(current_best_path.empty() || best_found_path.size() < current_best_path.size())
+            {
+                if(!current_best_path.empty()) found_paths.push_back(current_best_path);
+                current_best_path = best_found_path;
+            }
+            else
+            {
+                found_paths.push_back(best_found_path);
+            }
         }
 
-        updatePheromoneTable(pheromone_table, current_best_path);
+        updatePheromoneTable(pheromone_table, current_best_path, found_paths);
     }
 
     if(current_best_path.empty())
@@ -54,10 +62,10 @@ PheromoneTable ACO::initPheromoneTable(const std::shared_ptr<Graph> &graph) cons
     return result;
 }
 
-void ACO::updatePheromoneTable(PheromoneTable &phermone_table, const Path &path) {
-    if(path.size() < 2) return;
+void ACO::updatePheromoneTable(PheromoneTable &phermone_table, const Path &best_path, const std::vector<Path> &other_found_paths) {
+    if(best_path.size() < 2) return;
 
-    for(auto it = path.begin(); it < path.end()-1; ++it)
+    for(auto it = best_path.begin(); it < best_path.end() - 1; ++it)
     {
         auto from = *it;
         auto to = *(it+1);
@@ -66,13 +74,33 @@ void ACO::updatePheromoneTable(PheromoneTable &phermone_table, const Path &path)
         {
             if( edge->source == from && edge->target == to )
             {
-                pheromones_count += 1.0/path.size();
-            }
-            else
-            {
-                // evaporate here?
+                pheromones_count += evaporation_param * (1.0 / best_path.size());
             }
         }
+    }
+
+    for(const auto& path : other_found_paths)
+    {
+        if(path.size() < 2) continue;
+        for(auto it = path.begin(); it < path.end() - 1; ++it)
+        {
+            auto from = *it;
+            auto to = *(it+1);
+
+            for( auto& [edge, pheromones_count] : phermone_table)
+            {
+                if( edge->source == from && edge->target == to )
+                {
+                    pheromones_count += 1.0 / path.size();
+                }
+            }
+        }
+    }
+
+    for( auto& [edge, pheromones_count] : phermone_table)
+    {
+        pheromones_count *= 1 - evaporation_param;
+        if( pheromones_count < initial_pheromons_amount ) pheromones_count = initial_pheromons_amount;
     }
 }
 
@@ -102,14 +130,12 @@ std::shared_ptr<Vertex> Ant::chooseNextVertex(const std::vector<std::shared_ptr<
 
 
 
-void Ant::find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id,
-                      const PheromoneTable &pheromone_table, std::function<void(const Path)> finished_callback) {
+Path Ant::find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id, const PheromoneTable &pheromone_table) {
     auto path = Path{starting_point};
 
     if(starting_point->getId() == server_node_id)
     {
-        finished_callback(path);
-        return;
+        return path;
     }
 
     bool server_found = false;
@@ -159,5 +185,7 @@ void Ant::find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr
         }
     }
 
-    server_found ? finished_callback(path) : finished_callback(Path());
+    if(server_found)
+        return path;
+    return Path();
 }
