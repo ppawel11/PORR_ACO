@@ -1,18 +1,20 @@
 #include <iostream>
-#include "../include/Graph/graph.h"
+#include "../include/RoutingTableGenerator/RoutingTableGenerator.h"
+#include "../include/Algorithms/aco_omp.h"
 
 int main() {
-    auto graph = readGraphFromFile("../config/small_network.txt");
+    srand(0);
 
-    for( int i = 1; i<7; ++i)
+    auto graph = readGraphFromFile("../config/small_network.txt");
+    std::shared_ptr<Algorithm> algorithm = std::make_shared<ACO_OMP>(10, 10, 0.5, 0.5, 0.5);
+
+    RoutingTableGenerator routing_table_generator(graph, algorithm);
+
+    auto routing_pairs = routing_table_generator.generateRoutingTableTo(3);
+
+    for( const auto& routing_pair : routing_pairs)
     {
-        auto neigh = graph->getNeighbours(i);
-        std::cout<<i<<": ";
-        for( const auto& n : neigh )
-        {
-            std::cout<<n->getId()<<" ";
-        }
-        std::cout<<std::endl;
+        std::cout<<routing_pair.first->getId()<<" -> "<<routing_pair.second->getId()<<std::endl;
     }
 
     return 0;
