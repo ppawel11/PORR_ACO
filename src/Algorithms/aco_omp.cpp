@@ -21,7 +21,7 @@ Path ACO_OMP::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
             int path_id = omp_get_thread_num();
             while(path_id < number_of_ants_per_cycle )
             {
-                auto ant = Ant(alpha, beta);
+                auto ant = Ant(max_ant_steps, alpha, beta);
                 auto best_found_path = ant.find_server(graph, starting_point, server_id, pheromone_table);
 
                 if(!best_found_path.empty())

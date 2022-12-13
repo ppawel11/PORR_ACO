@@ -3,15 +3,21 @@
 #include <utility>
 #include <random>
 #include <iostream>
+#include <chrono>
 
 PathsToTarget ACO::computePaths(std::shared_ptr<Graph> graph, int server_id) {
     PathsToTarget result = {};
 
     for (auto& [node_id, node]: graph->getNodes())
     {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         auto path_to_server = computePath(graph, server_id, node_id);
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+        auto time_s = std::chrono::duration_cast<std::chrono::seconds> (end - begin).count();
+
         result.push_back(VertexPathPair(node, path_to_server));
-        std::cout<<"path found: "<<node_id<<" -> "<<server_id<<std::endl;
+        std::cout<<"path found: "<<node_id<<" -> "<<server_id<<" path size: "<<path_to_server.size()<<" in time: "<<time_s<<" [s]"<<std::endl;
     }
 
     return result;
@@ -28,7 +34,7 @@ Path ACO::computePath(const std::shared_ptr<Graph> &graph, int server_id, int st
     {
         for(int ant_id = 0; ant_id < number_of_ants_per_cycle; ++ant_id)
         {
-            auto ant = Ant(alpha, beta);
+            auto ant = Ant(max_ant_steps, alpha, beta);
             auto best_found_path = ant.find_server(graph, starting_point, server_id, pheromone_table);
 
             if(best_found_path.empty()) break;
@@ -143,8 +149,14 @@ Path Ant::find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr
     count_of_path_resets = 0;
     count_of_deleted_cycles = 0;
 
+    int steps = 0;
     while(count_of_path_resets < 10)
     {
+        if( ++steps > max_steps )
+        {
+            break;
+        }
+
         auto next_possible_edges = graph->getEdgesFromNode(path.back()->getId());
         if(path.size() > 2)
             next_possible_edges.erase(std::remove_if(next_possible_edges.begin(), next_possible_edges.end(), [&path](const auto& edge){ return edge->target->getId() == path.rbegin()[1]->getId(); }), next_possible_edges.end() );
@@ -170,14 +182,14 @@ Path Ant::find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr
         if(same_vertex != std::end(path))
         {
             path.erase(same_vertex+1, path.end());
-            count_of_deleted_cycles++;
-            if( count_of_deleted_cycles >= 3)
-            {
-                path.resize(1);
-                count_of_deleted_cycles = 0;
-                count_of_path_resets++;
-                continue;
-            }
+//            count_of_deleted_cycles++;
+//            if( count_of_deleted_cycles >= 10)
+//            {
+//                path.resize(1);
+//                count_of_deleted_cycles = 0;
+//                count_of_path_resets++;
+//                continue;
+//            }
         }
         else
         {

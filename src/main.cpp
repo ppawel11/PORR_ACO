@@ -5,8 +5,8 @@
 int main() {
     srand(0);
 
-    auto graph = readGraphFromFile("../config/small_network.txt");
-    std::shared_ptr<Algorithm> algorithm = std::make_shared<ACO_OMP>(10, 10, 0.5, 0.5, 0.5);
+    auto graph = readGraphFromFile("../config/grid20x20.txt");
+    std::shared_ptr<Algorithm> algorithm = std::make_shared<ACO_OMP>(8, 1000, 16, 0.5, 0.5, 0.5);
 
     RoutingTableGenerator routing_table_generator(graph, algorithm);
 
