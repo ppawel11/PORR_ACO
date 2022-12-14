@@ -30,8 +30,10 @@ Path ACO::computePath(const std::shared_ptr<Graph> &graph, int server_id, int st
     auto current_best_path = Path();
     std::vector<Path> found_paths = {};
 
+
     for(int cycle_id = 0; cycle_id < number_of_cycles; ++cycle_id)
     {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         for(int ant_id = 0; ant_id < number_of_ants_per_cycle; ++ant_id)
         {
             auto ant = Ant(max_ant_steps, alpha, beta);
@@ -48,8 +50,13 @@ Path ACO::computePath(const std::shared_ptr<Graph> &graph, int server_id, int st
                 found_paths.push_back(best_found_path);
             }
         }
-
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         updatePheromoneTable(pheromone_table, current_best_path, found_paths);
+        std::chrono::steady_clock::time_point update = std::chrono::steady_clock::now();
+
+        auto time_s = std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count();
+        auto time_s_update = std::chrono::duration_cast<std::chrono::milliseconds> (update - end).count();
+        std::cout<<"cycle "<<cycle_id<<" ants time: "<<time_s<<" pheromone update time: "<<time_s_update<<std::endl;
     }
 
     if(current_best_path.empty())

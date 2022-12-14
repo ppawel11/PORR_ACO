@@ -15,6 +15,8 @@ Path ACO_OMP::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
 
     for(int cycle_id = 0; cycle_id < number_of_cycles; ++cycle_id)
     {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
         //todo: user defined threads number
         #pragma omp parallel num_threads(4)
         {
@@ -46,6 +48,8 @@ Path ACO_OMP::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
             }
         }
 
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
         // ugly hack
         // todo: let Ant remember its best path, change found_paths to std::vector<Ant> and pass it to updatePheromoneTable after each cycle
         std::vector<Path> found_paths_deptr = {};
@@ -53,7 +57,20 @@ Path ACO_OMP::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
         {
             if(!path_ptr->empty()) found_paths_deptr.push_back(*path_ptr);
         }
+
+        std::chrono::steady_clock::time_point rewrite = std::chrono::steady_clock::now();
+
+
+
         updatePheromoneTable(pheromone_table, current_best_path, found_paths_deptr);
+
+        std::chrono::steady_clock::time_point update = std::chrono::steady_clock::now();
+
+        auto time_ants = std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count();
+        auto time_rewrite = std::chrono::duration_cast<std::chrono::milliseconds> (rewrite - end).count();
+        auto time_update = std::chrono::duration_cast<std::chrono::milliseconds> (update - rewrite).count();
+
+        std::cout<<"cycle "<<cycle_id<<" ants time: "<<time_ants<<" rewrite time: "<<time_rewrite<<" pheromone update time: "<<time_update<<std::endl;
     }
 
     if(current_best_path.empty())
