@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
         algorithm = std::make_shared<ACO>(8, 1000, 16, 0.5, 0.5, 0.5);
     }
     else if(std::strcmp(argv[1], "omp") == 0){
-        algorithm = std::make_shared<ACO_OMP>(8, 1000, 16, 0.5, 0.5, 0.5);
+        algorithm = std::make_shared<ACO_OMP>(8, 1000, 16, 0.5, 0.5, 0.5, std::stoi(argv[2]));
     }
     else{
         std::cout << "Provided wrong algorithm version!" << std::endl;
