@@ -16,7 +16,7 @@ Path ACO_OMP::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
     for(int cycle_id = 0; cycle_id < number_of_cycles; ++cycle_id)
     {
         //todo: user defined threads number
-        #pragma omp parallel num_threads(4)
+        #pragma omp parallel num_threads(16)
         {
             int path_id = omp_get_thread_num();
             while(path_id < number_of_ants_per_cycle )

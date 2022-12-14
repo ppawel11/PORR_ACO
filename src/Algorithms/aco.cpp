@@ -14,10 +14,10 @@ PathsToTarget ACO::computePaths(std::shared_ptr<Graph> graph, int server_id) {
         auto path_to_server = computePath(graph, server_id, node_id);
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-        auto time_s = std::chrono::duration_cast<std::chrono::seconds> (end - begin).count();
+        auto time_s = std::chrono::duration_cast<std::chrono::microseconds> (end - begin).count();
 
         result.push_back(VertexPathPair(node, path_to_server));
-        std::cout<<"path found: "<<node_id<<" -> "<<server_id<<" path size: "<<path_to_server.size()<<" in time: "<<time_s<<" [s]"<<std::endl;
+        std::cout<<"path found: "<<node_id<<" -> "<<server_id<<" path size: "<<path_to_server.size()<<" in time: {"<<time_s<<"} [s]"<<std::endl;
     }
 
     return result;
