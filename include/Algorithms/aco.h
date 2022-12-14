@@ -15,7 +15,7 @@ class Ant {
 
 public:
     Ant(int max_steps, float alpha, float beta): max_steps{max_steps}, alpha{alpha}, beta{beta} {};
-    Path find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id, const PheromoneTable &pheromone_table);
+    std::shared_ptr<Path> find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id, const PheromoneTable &pheromone_table);
 
 private:
     static std::shared_ptr<Vertex> chooseNextVertex(
@@ -40,7 +40,7 @@ public:
 protected:
     virtual Path computePath(const std::shared_ptr<Graph>& graph, int server_id, int starting_point_id);
     PheromoneTable initPheromoneTable(const std::shared_ptr<Graph>& graph) const;
-    void updatePheromoneTable(PheromoneTable &phermone_table, const Path &best_path, const std::vector<Path> &other_found_paths);
+    void updatePheromoneTable(PheromoneTable &phermone_table, std::shared_ptr<Path> &best_path, const std::vector<std::shared_ptr<Path>> &other_found_paths);
 };
 
 #endif //PROJEKT_ACO_H
