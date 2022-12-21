@@ -16,15 +16,33 @@ int main(int argc, char** argv) {
      */
     srand(0);
 
+    if(argc < 2)
+    {
+        std::cout<<"Choose algorithm version"<<std::endl;
+        return 1;
+    }
+
+    if(argc < 3)
+    {
+        std::cout<<"Choose number of ants per cycle"<<std::endl;
+        return 1;
+    }
+
     auto graph = readGraphFromFile("../config/grid_10x10.txt");
 
     std::shared_ptr<Algorithm> algorithm = nullptr;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     if(std::strcmp(argv[1], "basic") == 0){
-        algorithm = std::make_shared<ACO>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5, 0.5);
+        algorithm = std::make_shared<ACO>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5);
     }
     else if(std::strcmp(argv[1], "omp") == 0){
-        algorithm = std::make_shared<ACO_OMP>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5, 0.5, std::stoi(argv[3]));
+        if( argc < 4)
+        {
+            std::cout<<"OMP Algorithm chosen - specify number of threads to be used"<<std::endl;
+            return 1;
+        }
+        algorithm = std::make_shared<ACO_OMP>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5, std::stoi(argv[3]));
     }
     else{
         std::cout << "Provided wrong algorithm version!" << std::endl;
@@ -38,12 +56,6 @@ int main(int argc, char** argv) {
     auto time_s = std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count();
 
     std::cout << time_s << std::endl;
-
-    for( const auto& routing_pair : routing_pairs)
-    {
-//        std::cout<<routing_pair.first->getId()<<" -> "<<routing_pair.second->getId()<<std::endl;
-    }
-
 
     return 0;
 }

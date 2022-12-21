@@ -8,7 +8,6 @@ add_executable(Projekt
         src/main.cpp
         src/Graph/graph.cpp
         src/RoutingTableGenerator/RoutingTableGenerator.cpp
-        src/Algorithms/dumb_algorithm.cpp
         src/Algorithms/aco.cpp
         src/Algorithms/aco_omp.cpp
         )
