@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 #include <fstream>
+#include <algorithm>
 
 void Graph::addNode(std::shared_ptr<Vertex> node) {
     if(nodes.contains(node->getId()))
