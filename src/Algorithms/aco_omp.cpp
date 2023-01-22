@@ -21,17 +21,17 @@ Path ACO_OMP::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
             while(path_id < number_of_ants_per_cycle )
             {
                 auto ant = Ant(max_ant_steps);
-                auto best_found_path = ant.find_server(graph, starting_point, server_id, pheromone_table);
+//                auto best_found_path = ant.find_server(graph, starting_point, server_id, pheromone_table);
 
                 // update the path stored in the vector
                 // the id of updated path int he vector is: id_of_the_thread + id_of_an_ant_in_this_thread * number_of_all_threads
-                found_paths[path_id] = best_found_path;
+ //               found_paths[path_id] = best_found_path;
 
                 path_id += omp_get_num_threads();
             }
         }
 
-        updatePheromoneTable(pheromone_table, current_best_path, found_paths);
+   //     updatePheromoneTable(pheromone_table, current_best_path, found_paths);
     }
 
     if(current_best_path->empty())

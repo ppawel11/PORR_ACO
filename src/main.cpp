@@ -3,6 +3,7 @@
 #include <chrono>
 #include "../include/RoutingTableGenerator/RoutingTableGenerator.h"
 #include "../include/Algorithms/aco_omp.h"
+#include "../include/Algorithms/aco_acc.h"
 
 int main(int argc, char** argv) {
     /**
@@ -10,6 +11,7 @@ int main(int argc, char** argv) {
      * arg[1] -> algorithm choice:
      *  - basic -> no parallelization
      *  - omp -> OpenMP
+     *  - acc -> ACC
      *
      * arg[2] -> number of ants
      * arg[3] -> threads number
@@ -28,7 +30,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    auto graph = readGraphFromFile("../config/grid_10x10.txt");
+    auto graph = readGraphFromFile("../PORR_ACO/config/grid_10x10.txt");
 
     std::shared_ptr<Algorithm> algorithm = nullptr;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -45,7 +47,11 @@ int main(int argc, char** argv) {
         algorithm = std::make_shared<ACO_OMP>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5, std::stoi(argv[3]));
     }
     else{
-        std::cout << "Provided wrong algorithm version!" << std::endl;
+        if(std::strcmp(argv[1], "acc") == 0){
+            algorithm = std::make_shared<ACO_ACC>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5);
+        }
+        else
+            std::cout << "Provided wrong algorithm version!" << std::endl;
     }
 
     RoutingTableGenerator routing_table_generator(graph, algorithm);

@@ -25,14 +25,14 @@ PathsToTarget ACO::computePaths(std::shared_ptr<Graph> graph, int server_id) {
         auto time_s = std::chrono::duration_cast<std::chrono::microseconds> (end - begin).count();
 
         result.push_back(VertexPathPair(node, path_to_server));
-//        std::cout<<"path found: "<<node_id<<" -> "<<server_id<<" path size: "<<path_to_server.size()<<" in time: {"<<time_s<<"} [s]"<<std::endl;
+        std::cout<<"path found: "<<node_id<<" -> "<<server_id<<" path size: "<<path_to_server.size()<<" in time: {"<<time_s<<"} [s]"<<std::endl;
     }
 
     return result;
 }
 
 Path ACO::computePath(const std::shared_ptr<Graph> &graph, int server_id, int starting_point_id) {
-    auto pheromone_table = initPheromoneTable(graph);
+    auto pheromone_table = std::make_shared<PheromoneTable>(initPheromoneTable(graph));
     auto starting_point = graph->getNode(starting_point_id);
     auto current_best_path = std::make_shared<Path>();
 
@@ -42,7 +42,7 @@ Path ACO::computePath(const std::shared_ptr<Graph> &graph, int server_id, int st
         // during the cycle every ant will find up to one path
         std::vector<std::shared_ptr<Path>> found_paths(number_of_ants_per_cycle, std::make_shared<Path>());
 
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+//        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         for(int ant_id = 0; ant_id < number_of_ants_per_cycle; ++ant_id)
         {
             auto ant = Ant(max_ant_steps);
@@ -71,7 +71,7 @@ PheromoneTable ACO::initPheromoneTable(const std::shared_ptr<Graph> &graph) cons
     return result;
 }
 
-void ACO::updatePheromoneTable(PheromoneTable &phermone_table, std::shared_ptr<Path> &best_path, const std::vector<std::shared_ptr<Path>> &found_paths) {
+void ACO::updatePheromoneTable(std::shared_ptr<PheromoneTable> phermone_table, std::shared_ptr<Path> &best_path, const std::vector<std::shared_ptr<Path>> &found_paths) {
     auto best_path_buffer = std::make_shared<Path>();
 
     for(auto& path : found_paths)
@@ -85,7 +85,7 @@ void ACO::updatePheromoneTable(PheromoneTable &phermone_table, std::shared_ptr<P
             auto from = *it;
             auto to = *(it+1);
 
-            for( auto& [edge, pheromones_count] : phermone_table)
+            for( auto& [edge, pheromones_count] : *phermone_table)
             {
                 // for every edge in the path increase the pheromone amount by 1/path length
                 if( edge->source == from && edge->target == to )
@@ -96,7 +96,7 @@ void ACO::updatePheromoneTable(PheromoneTable &phermone_table, std::shared_ptr<P
         }
     }
 
-    for( auto& [edge, pheromones_count] : phermone_table)
+    for( auto& [edge, pheromones_count] : *phermone_table)
     {
         // multiply pheromones amount on every edge by evaporation_param
         pheromones_count *= evaporation_param;
@@ -107,25 +107,25 @@ void ACO::updatePheromoneTable(PheromoneTable &phermone_table, std::shared_ptr<P
     if(best_path->empty() || (!best_path_buffer->empty() && best_path_buffer->size() < best_path->size())) best_path = best_path_buffer;
 }
 
-std::shared_ptr<Vertex> Ant::chooseNextVertex(const std::vector<std::shared_ptr<Edge>> &possible_edges, const PheromoneTable &pheromone_table)
+std::shared_ptr<Vertex> Ant::chooseNextVertex(const std::vector<std::shared_ptr<Edge>> &possible_edges, std::shared_ptr<PheromoneTable> pheromone_table)
 {
     // weighted random select of next Vertex where pheromone amount on the edge leading to the Vertex is the weight
     int sum_of_weight = 0;
 
     for(const std::shared_ptr<Edge>& edge : possible_edges)
     {
-        sum_of_weight += pheromone_table.at(edge) * 100.0;
+        sum_of_weight += pheromone_table->at(edge) * 100.0;
     }
 
     int random_number = rand() % sum_of_weight;
 
     for(const std::shared_ptr<Edge>& edge : possible_edges)
     {
-        if(random_number < pheromone_table.at(edge)*100.0)
+        if(random_number < pheromone_table->at(edge)*100.0)
         {
             return edge->target;
         }
-        random_number -= pheromone_table.at(edge) * 100.0;
+        random_number -= pheromone_table->at(edge) * 100.0;
     }
 
     throw std::runtime_error("Random next vertex choice failure.");
@@ -133,7 +133,7 @@ std::shared_ptr<Vertex> Ant::chooseNextVertex(const std::vector<std::shared_ptr<
 
 
 
-std::shared_ptr<Path> Ant::find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id, const PheromoneTable &pheromone_table) {
+std::shared_ptr<Path> Ant::find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id, std::shared_ptr<PheromoneTable> pheromone_table) {
     auto path = std::make_shared<Path>();
     path->push_back(starting_point);
 

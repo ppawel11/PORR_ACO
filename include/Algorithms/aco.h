@@ -12,12 +12,12 @@ class Ant {
 
 public:
     Ant(int max_steps): max_steps{max_steps} {};
-    std::shared_ptr<Path> find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id, const PheromoneTable &pheromone_table);
+    std::shared_ptr<Path> find_server(const std::shared_ptr<Graph> &graph, const std::shared_ptr<Vertex> &starting_point, int server_node_id, std::shared_ptr<PheromoneTable> pheromone_table);
 
 private:
     static std::shared_ptr<Vertex> chooseNextVertex(
             const std::vector<std::shared_ptr<Edge>> &possible_edges,
-            const PheromoneTable &pheromone_table);
+            std::shared_ptr<PheromoneTable> pheromone_table);
 };
 
 class ACO: public Algorithm{
@@ -41,7 +41,7 @@ public:
 protected:
     virtual Path computePath(const std::shared_ptr<Graph>& graph, int server_id, int starting_point_id);
     PheromoneTable initPheromoneTable(const std::shared_ptr<Graph>& graph) const;
-    void updatePheromoneTable(PheromoneTable &phermone_table, std::shared_ptr<Path> &best_path, const std::vector<std::shared_ptr<Path>> &found_paths);
+    void updatePheromoneTable(std::shared_ptr<PheromoneTable> phermone_table, std::shared_ptr<Path> &best_path, const std::vector<std::shared_ptr<Path>> &found_paths);
 };
 
 #endif //PROJEKT_ACO_H
