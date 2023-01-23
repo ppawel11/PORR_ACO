@@ -39,7 +39,7 @@ public:
     PathsToTarget computePaths(std::shared_ptr<Graph> graph, int server_id) override;
 
 protected:
-    #pragma acc routine seq
+//    #pragma acc routine seq
     virtual Path computePath(const std::shared_ptr<Graph>& graph, int server_id, int starting_point_id);
     PheromoneTable initPheromoneTable(const std::shared_ptr<Graph>& graph) const;
     void updatePheromoneTable(std::shared_ptr<PheromoneTable> phermone_table, std::shared_ptr<Path> &best_path, const std::vector<std::shared_ptr<Path>> &found_paths);
