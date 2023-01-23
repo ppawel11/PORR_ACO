@@ -103,7 +103,9 @@ Path ACO_ACC::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
                         }
 
                         auto it = path->begin();
+                        int count = 0;
                         for (it = path->begin(); it != path->end(); ++it) {
+                            count++;
                             if (it->get()->id == next_vertex->id) {
                                 break;
                             }
@@ -111,7 +113,8 @@ Path ACO_ACC::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
 
                         if (it != path->end()) {
                             // if the Ant has already been in this Vertex - remove the cycle from the path
-                            path->erase(it + 1, path->end());
+//                            path->erase(it + 1, path->end());
+                            path->resize(count+1);
                         } else {
                             path->push_back(next_vertex);
                         }
