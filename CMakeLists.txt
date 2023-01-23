@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 project(Projekt)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-fopenacc -fopt-info-optimized-omp -fcf-protection=none -fno-stack-protector")
 #set(CMAKE_CXX_FLAGS -fopt-info-optimized-omp)
 

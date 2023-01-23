@@ -34,6 +34,7 @@ public:
     std::shared_ptr<Vertex> getNode(int node_id);
     std::vector<std::shared_ptr<Vertex>> getNeighbours(int node_id) const;
     std::vector<std::shared_ptr<Edge>> getEdgesFromNode(int node_id) const;
+    std::vector<std::shared_ptr<Edge>> getEdgesFromNode(int node_id, int banned_id) const;
     const std::unordered_map<int, std::shared_ptr<Vertex>>& getNodes() const;
     const std::vector<std::shared_ptr<Edge>>& getEdges() const;
 };

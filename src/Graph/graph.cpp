@@ -5,7 +5,7 @@
 #include <algorithm>
 
 void Graph::addNode(std::shared_ptr<Vertex> node) {
-    if(nodes.contains(node->getId()))
+    if(nodes.find(node->getId()) != nodes.end())
     {
         throw std::runtime_error("Node already exists!");
     }
@@ -13,7 +13,7 @@ void Graph::addNode(std::shared_ptr<Vertex> node) {
 }
 
 void Graph::connectNodes(int source_id, int target_id) {
-    if(!nodes.contains(source_id) || !nodes.contains(target_id))
+    if(nodes.find(source_id) == nodes.end() || nodes.find(target_id) == nodes.end())
     {
         throw std::runtime_error("Invalid nodes.");
     }
@@ -32,7 +32,7 @@ void Graph::connectNodes(int source_id, int target_id) {
 }
 
 bool Graph::hasNode(int node_id) const {
-    return nodes.contains(node_id);
+    return nodes.find(node_id) != nodes.end();
 }
 
 std::vector<std::shared_ptr<Vertex>> Graph::getNeighbours(int node_id) const{
@@ -70,6 +70,18 @@ std::vector<std::shared_ptr<Edge>> Graph::getEdgesFromNode(int node_id) const {
     for(const auto& edge : edges)
     {
         if(edge->source->getId() == node_id)
+        {
+            result.push_back(edge);
+        }
+    }
+    return result;
+}
+
+std::vector<std::shared_ptr<Edge>> Graph::getEdgesFromNode(int node_id, int banned_id) const {
+    std::vector<std::shared_ptr<Edge>> result = {};
+    for(const auto& edge : edges)
+    {
+        if(edge->source->getId() == node_id && edge->target->getId() != banned_id)
         {
             result.push_back(edge);
         }

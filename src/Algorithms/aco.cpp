@@ -12,8 +12,8 @@ PathsToTarget ACO::computePaths(std::shared_ptr<Graph> graph, int server_id) {
 //        #pragma acc data copy(result)
 //    {
 //        #pragma acc kernels
-        for (auto&[node_id, node]: graph->getNodes()) {
-            if (node_id == server_id) {
+        for (auto& node_id_node: graph->getNodes()) {
+            if (node_id_node.first == server_id) {
                 // no need to look for the path from the server node
                 result.push_back(VertexPathPair{graph->getNode(server_id),
                                                 Path{graph->getNode(server_id)}});
@@ -21,15 +21,15 @@ PathsToTarget ACO::computePaths(std::shared_ptr<Graph> graph, int server_id) {
             }
 
             std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-            auto path_to_server = computePath(graph, server_id, node_id);
+            auto path_to_server = computePath(graph, server_id, node_id_node.first);
             std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
             auto time_s = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
             if( !path_to_server.empty())
-                result.push_back(VertexPathPair(node, path_to_server));
+                result.push_back(VertexPathPair(node_id_node.second, path_to_server));
 
-            std::cout << "path found: " << node_id << " -> " << server_id << " path size: " << path_to_server.size()
+            std::cout << "path found: " << node_id_node.first << " -> " << server_id << " path size: " << path_to_server.size()
                       << " in time: {" << time_s << "} [s]" << std::endl;
             for( const auto& v : path_to_server )
             {
@@ -98,22 +98,22 @@ void ACO::updatePheromoneTable(std::shared_ptr<PheromoneTable> phermone_table, s
             auto from = *it;
             auto to = *(it+1);
 
-            for( auto& [edge, pheromones_count] : *phermone_table)
+            for( auto& edge_pheromones : *phermone_table)
             {
                 // for every edge in the path increase the pheromone amount by 1/path length
-                if( edge->source == from && edge->target == to )
+                if( edge_pheromones.first->source == from && edge_pheromones.first->target == to )
                 {
-                    pheromones_count += 1.0 / path->size();
+                    edge_pheromones.second += 1.0 / path->size();
                 }
             }
         }
     }
 
-    for( auto& [edge, pheromones_count] : *phermone_table)
+    for( auto& edge_pheromones : *phermone_table)
     {
         // multiply pheromones amount on every edge by evaporation_param
-        pheromones_count *= evaporation_param;
-        if( pheromones_count < initial_pheromons_amount ) pheromones_count = initial_pheromons_amount;
+        edge_pheromones.second *= evaporation_param;
+        if( edge_pheromones.second < initial_pheromons_amount ) edge_pheromones.second = initial_pheromons_amount;
     }
 
     // if best path found in this cycle (best path buffer) is better than global best path (best_path) replace the global best path with the one found in this cycle
@@ -167,15 +167,18 @@ std::shared_ptr<Path> Ant::find_server(const std::shared_ptr<Graph> &graph, cons
             break;
         }
 
-        auto next_possible_edges = graph->getEdgesFromNode(path->back()->getId());
-        if(path->size() > 2)
-        {
-            // from next possible edges remove the edge which was used in the last move
-            next_possible_edges.erase(std::remove_if(next_possible_edges.begin(), next_possible_edges.end(),
-                                                     [&path](const auto &edge) {
-                                                         return edge->target->getId() == path->rbegin()[1]->getId();
-                                                     }), next_possible_edges.end());
-        }
+        auto next_possible_edges = graph->getEdgesFromNode(path->back()->getId(), path->rbegin()[1]->getId());
+//        if(path->size() > 2)
+//        {
+//             from next possible edges remove the edge which was used in the last move
+//            next_possible_edges.erase(std::remove_if(next_possible_edges.begin(), next_possible_edges.end(),
+//                                                     [&path](const auto &edge) {
+//                                                         return edge->target->getId() == path->rbegin()[1]->getId();
+//                                                     }), next_possible_edges.end());
+//            auto rbeg_id = (*path)[path->size() - 2]->id;
+//            if (edge_id == rbeg_id)
+//                continue;
+//        }
 
         if(next_possible_edges.empty())
         {
@@ -196,15 +199,17 @@ std::shared_ptr<Path> Ant::find_server(const std::shared_ptr<Graph> &graph, cons
         }
 
         // find out if the ant has already been in the new visited Vertex
-        auto same_vertex = std::find_if(path->begin(), path->end(), [&next_vertex](const auto& vertex_in_path){ return vertex_in_path->getId() == next_vertex->getId(); });
-
-        if(same_vertex != path->end())
-        {
-            // if the Ant has already been in this Vertex - remove the cycle from the path
-            path->erase(same_vertex+1, path->end());
+        auto it = path->begin();
+        for (it = path->begin(); it != path->end(); ++it) {
+            if (it->get()->id == next_vertex->id) {
+                break;
+            }
         }
-        else
-        {
+
+        if (it != path->end()) {
+            // if the Ant has already been in this Vertex - remove the cycle from the path
+            path->erase(it + 1, path->end());
+        } else {
             path->push_back(next_vertex);
         }
     }
