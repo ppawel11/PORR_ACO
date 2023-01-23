@@ -1,5 +1,7 @@
 #include "../../include/Algorithms/aco_acc.h"
 #include <iostream>
+#include <openacc.h>
+#include "openacc_curand.h"
 
 Path ACO_ACC::computePath(const std::shared_ptr<Graph> &graph, int server_id, int starting_point_id) {
     auto pheromone_table = std::make_shared<PheromoneTable>(initPheromoneTable(graph));
@@ -12,13 +14,23 @@ Path ACO_ACC::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
         // during the cycle every ant will find up to one path
         std::vector<std::shared_ptr<Path>> found_paths(number_of_ants_per_cycle, std::make_shared<Path>());
         std::vector<std::shared_ptr<Ant>> ants(number_of_ants_per_cycle, std::make_shared<Ant>(max_ant_steps));
+        std::vector<int> seeds = {};
+        seeds.reserve(number_of_ants_per_cycle);
+        for(int i = 0; i < number_of_ants_per_cycle; ++i)
+        {
+            seeds.emplace_back(rand());
+        }
 //        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-        #pragma acc data copy(pheromone_table, ants, found_paths, current_best_path), copyin(server_id, graph, starting_point)
+        #pragma acc data copy(pheromone_table, ants, found_paths, seeds, current_best_path), copyin(server_id, graph, starting_point)
         {
-            #pragma acc parallel loop present(found_paths, ants, pheromone_table, server_id, graph, starting_point)
+            #pragma acc parallel loop present(found_paths, ants, seeds, pheromone_table, server_id, graph, starting_point)
             for (int ant_id = 0; ant_id < number_of_ants_per_cycle; ++ant_id) {
                 //                auto ant = Ant(max_ant_steps);
+                curandState_t state;
+                int gangidx = __pgi_gangidx();
+                curand_init(seeds[gangidx], gangidx, 0, &state);
+
                 int count_of_path_resets = 0;
                 int max_steps = max_ant_steps;
                 bool server_found = false;
@@ -61,7 +73,9 @@ Path ACO_ACC::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
                         }
 
 
-                        int random_number = rand() % sum_of_weight;
+//                        int random_number = rand() % sum_of_weight;
+                        int random_number = curand_uniform(&state) * sum_of_weight;
+
                         for (const std::shared_ptr<Edge> &edge : next_possible_edges) {
                             if( path->size() > 1) {
                                 auto rbeg_id = (*path)[path->size() - 2]->id;
