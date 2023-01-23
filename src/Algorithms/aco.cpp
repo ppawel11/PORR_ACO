@@ -8,29 +8,34 @@
 PathsToTarget ACO::computePaths(std::shared_ptr<Graph> graph, int server_id) {
     PathsToTarget result = {};
 
-    for (auto& [node_id, node]: graph->getNodes())
+
+        #pragma acc data copy(result)
     {
-        if(node_id == server_id)
-        {
-            // no need to look for the path from the server node
-            result.push_back(VertexPathPair{graph->getNode(server_id),
-                                            Path{graph->getNode(server_id)}});
-            continue;
+        #pragma acc kernels
+        for (auto&[node_id, node]: graph->getNodes()) {
+            if (node_id == server_id) {
+                // no need to look for the path from the server node
+                result.push_back(VertexPathPair{graph->getNode(server_id),
+                                                Path{graph->getNode(server_id)}});
+                continue;
+            }
+
+            std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+            auto path_to_server = computePath(graph, server_id, node_id);
+            std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+            auto time_s = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+            result.push_back(VertexPathPair(node, path_to_server));
+//            std::cout << "path found: " << node_id << " -> " << server_id << " path size: " << path_to_server.size()
+//                      << " in time: {" << time_s << "} [s]" << std::endl;
         }
-
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        auto path_to_server = computePath(graph, server_id, node_id);
-        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-
-        auto time_s = std::chrono::duration_cast<std::chrono::microseconds> (end - begin).count();
-
-        result.push_back(VertexPathPair(node, path_to_server));
-        std::cout<<"path found: "<<node_id<<" -> "<<server_id<<" path size: "<<path_to_server.size()<<" in time: {"<<time_s<<"} [s]"<<std::endl;
     }
 
     return result;
 }
 
+#pragma acc routine seq
 Path ACO::computePath(const std::shared_ptr<Graph> &graph, int server_id, int starting_point_id) {
     auto pheromone_table = std::make_shared<PheromoneTable>(initPheromoneTable(graph));
     auto starting_point = graph->getNode(starting_point_id);

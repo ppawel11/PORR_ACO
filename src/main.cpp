@@ -4,6 +4,7 @@
 #include "../include/RoutingTableGenerator/RoutingTableGenerator.h"
 #include "../include/Algorithms/aco_omp.h"
 #include "../include/Algorithms/aco_acc.h"
+#include <openacc.h>
 
 int main(int argc, char** argv) {
     /**
@@ -30,7 +31,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    auto graph = readGraphFromFile("../PORR_ACO/config/grid_10x10.txt");
+    auto graph = readGraphFromFile("../config/grid_10x10.txt");
 
     std::shared_ptr<Algorithm> algorithm = nullptr;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
