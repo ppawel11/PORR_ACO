@@ -22,10 +22,10 @@ struct Edge{
 };
 
 class Graph{
-    std::unordered_map<int, std::shared_ptr<Vertex>> nodes;
-    std::vector<std::shared_ptr<Edge>> edges;
-
 public:
+    std::unordered_map<int, std::shared_ptr<Vertex>> nodes;
+
+    std::vector<std::shared_ptr<Edge>> edges;
     Graph() {};
 
     void addNode(std::shared_ptr<Vertex> node);

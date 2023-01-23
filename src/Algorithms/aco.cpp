@@ -26,9 +26,11 @@ PathsToTarget ACO::computePaths(std::shared_ptr<Graph> graph, int server_id) {
 
             auto time_s = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
-            result.push_back(VertexPathPair(node, path_to_server));
-//            std::cout << "path found: " << node_id << " -> " << server_id << " path size: " << path_to_server.size()
-//                      << " in time: {" << time_s << "} [s]" << std::endl;
+            if( !path_to_server.empty())
+                result.push_back(VertexPathPair(node, path_to_server));
+
+            std::cout << "path found: " << node_id << " -> " << server_id << " path size: " << path_to_server.size()
+                      << " in time: {" << time_s << "} [s]" << std::endl;
 //        }
     }
 
