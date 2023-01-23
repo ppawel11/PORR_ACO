@@ -4,6 +4,7 @@
 #include "../include/RoutingTableGenerator/RoutingTableGenerator.h"
 #include "../include/Algorithms/aco_omp.h"
 #include "../include/Algorithms/aco_acc.h"
+#include "../include/Algorithms/aco_changed.h"
 #include <openacc.h>
 
 int main(int argc, char** argv) {
@@ -65,12 +66,16 @@ int main(int argc, char** argv) {
         }
         algorithm = std::make_shared<ACO_OMP>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5, std::stoi(argv[3]));
     }
-    else{
-        if(std::strcmp(argv[1], "acc") == 0){
-            algorithm = std::make_shared<ACO_ACC>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5);
-        }
-        else
-            std::cout << "Provided wrong algorithm version!" << std::endl;
+    else if(std::strcmp(argv[1], "acc")){
+        algorithm = std::make_shared<ACO_ACC>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5);
+    }
+    else if(std::strcmp(argv[1], "changed")) {
+        algorithm = std::make_shared<ACO_CHANGED>(std::stoi(argv[2]), 1000, 16, 0.5, 0.5);
+    }
+    else
+    {
+        std::cout << "Provided wrong algorithm version!" << std::endl;
+        return 1;
     }
 
     RoutingTableGenerator routing_table_generator(graph, algorithm);

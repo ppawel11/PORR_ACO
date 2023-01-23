@@ -25,4 +25,5 @@ add_executable(Projekt
         include/Graph/graph.h
         include/RoutingTableGenerator/RoutingTableGenerator.h
         include/Algorithms/aco_acc.h
-        )
+        include/Algorithms/aco_changed.h
+        src/Algorithms/aco_changed.cpp)

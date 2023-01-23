@@ -31,6 +31,11 @@ PathsToTarget ACO::computePaths(std::shared_ptr<Graph> graph, int server_id) {
 
             std::cout << "path found: " << node_id << " -> " << server_id << " path size: " << path_to_server.size()
                       << " in time: {" << time_s << "} [s]" << std::endl;
+            for( const auto& v : path_to_server )
+            {
+                std::cout<<v->id<<" -> ";
+            }
+            std::cout<<std::endl;
 //        }
     }
 
@@ -48,12 +53,13 @@ Path ACO::computePath(const std::shared_ptr<Graph> &graph, int server_id, int st
         // initialize vector of Paths with size equal to the number of ants per cycle
         // during the cycle every ant will find up to one path
         std::vector<std::shared_ptr<Path>> found_paths(number_of_ants_per_cycle, std::make_shared<Path>());
+        std::vector<std::shared_ptr<Ant>> ants(number_of_ants_per_cycle, std::make_shared<Ant>(max_ant_steps));
 
 //        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         for(int ant_id = 0; ant_id < number_of_ants_per_cycle; ++ant_id)
         {
-            auto ant = Ant(max_ant_steps);
-            auto best_found_path = ant.find_server(graph, starting_point, server_id, pheromone_table);
+//            auto ant = Ant(max_ant_steps);
+            auto best_found_path = ants[ant_id]->find_server(graph, starting_point, server_id, pheromone_table);
 
             // remember path found by ant in the vector
             found_paths[ant_id] = best_found_path;
