@@ -77,7 +77,8 @@ PheromoneTable ACO::initPheromoneTable(const std::shared_ptr<Graph> &graph) cons
 //    PheromoneTable result = {};
 
     PheromoneTable result_ = {};
-    result_.reserve(graph->getEdges().size());
+    int size = graph->getEdges().size();
+    result_.resize(size);
 
     for ( const auto& edge : graph->getEdges())
     {

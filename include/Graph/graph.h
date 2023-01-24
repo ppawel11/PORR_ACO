@@ -24,19 +24,20 @@ struct Edge{
 
 class Graph{
 public:
-    std::unordered_map<int, std::shared_ptr<Vertex>> nodes;
+//    std::unordered_map<int, std::shared_ptr<Vertex>> nodes;
+    std::vector<std::pair<int, std::shared_ptr<Vertex>>> nodes;
 
     std::vector<std::shared_ptr<Edge>> edges;
     Graph() {};
 
-    void addNode(std::shared_ptr<Vertex> node);
+    void addNode(const std::shared_ptr<Vertex>& node);
     void connectNodes(int source_id, int target_id);
     bool hasNode(int node_id) const;
     std::shared_ptr<Vertex> getNode(int node_id);
     std::vector<std::shared_ptr<Vertex>> getNeighbours(int node_id) const;
     std::vector<std::shared_ptr<Edge>> getEdgesFromNode(int node_id) const;
     std::vector<std::shared_ptr<Edge>> getEdgesFromNode(int node_id, int banned_id) const;
-    const std::unordered_map<int, std::shared_ptr<Vertex>>& getNodes() const;
+    const std::vector<std::pair<int, std::shared_ptr<Vertex>>> & getNodes() const;
     const std::vector<std::shared_ptr<Edge>>& getEdges() const;
 };
 

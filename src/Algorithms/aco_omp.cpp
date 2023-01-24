@@ -34,7 +34,7 @@ Path ACO_OMP::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
    //     updatePheromoneTable(pheromone_table, current_best_path, found_paths);
     }
 
-    if(current_best_path->empty())
-        throw std::runtime_error("No path found!");
+//    if(current_best_path->empty())
+//        throw std::runtime_error("No path found!");
     return *current_best_path;
 }

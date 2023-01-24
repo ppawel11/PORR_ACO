@@ -83,7 +83,7 @@ Path ACO_CHANGED::computePath(const std::shared_ptr<Graph> &graph, int server_id
                     if (next_vertex->id == server_id) {
                         // Ant found the server!
                         //                            path->push_back(graph->getNode(server_id));
-                        path->push_back(graph->nodes[server_id]);
+                        path->push_back(graph->nodes[server_id].second);
                         server_found = true;
                         break;
                     }
