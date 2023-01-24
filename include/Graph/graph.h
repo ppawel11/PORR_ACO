@@ -15,10 +15,11 @@ struct Vertex{
 };
 
 struct Edge{
+    int id;
     std::shared_ptr<Vertex> source;
     std::shared_ptr<Vertex> target;
 
-    Edge(std::shared_ptr<Vertex> source, std::shared_ptr<Vertex> target): source{source}, target{target} {}
+    Edge(std::shared_ptr<Vertex> source, std::shared_ptr<Vertex> target, int id): source{source}, target{target}, id{id} {}
 };
 
 class Graph{

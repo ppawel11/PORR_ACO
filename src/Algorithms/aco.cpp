@@ -68,20 +68,24 @@ Path ACO::computePath(const std::shared_ptr<Graph> &graph, int server_id, int st
         updatePheromoneTable(pheromone_table, current_best_path, found_paths);
     }
 
-    if(current_best_path->empty())
-        throw std::runtime_error("No path found!");
+//    if(current_best_path->empty())
+//        throw std::runtime_error("No path found!");
     return *current_best_path;
 }
 
 PheromoneTable ACO::initPheromoneTable(const std::shared_ptr<Graph> &graph) const {
-    PheromoneTable result = {};
+//    PheromoneTable result = {};
+
+    PheromoneTable result_ = {};
+    result_.reserve(graph->getEdges().size());
 
     for ( const auto& edge : graph->getEdges())
     {
-        result[edge] = initial_pheromons_amount;
+//        result[edge] = initial_pheromons_amount;
+        result_[edge->id] = { edge, initial_pheromons_amount };
     }
 
-    return result;
+    return result_;
 }
 
 void ACO::updatePheromoneTable(std::shared_ptr<PheromoneTable> phermone_table, std::shared_ptr<Path> &best_path, const std::vector<std::shared_ptr<Path>> &found_paths) {
@@ -127,21 +131,21 @@ std::shared_ptr<Vertex> Ant::chooseNextVertex(const std::vector<std::shared_ptr<
 
     for(const std::shared_ptr<Edge>& edge : possible_edges)
     {
-        sum_of_weight += pheromone_table->at(edge) * 100.0;
+        sum_of_weight += (*pheromone_table)[edge->id].second * 100.0;
     }
 
     int random_number = rand() % sum_of_weight;
 
     for(const std::shared_ptr<Edge>& edge : possible_edges)
     {
-        if(random_number < pheromone_table->at(edge)*100.0)
+        if(random_number < (*pheromone_table)[edge->id].second *100.0)
         {
             return edge->target;
         }
-        random_number -= pheromone_table->at(edge) * 100.0;
+        random_number -= (*pheromone_table)[edge->id].second * 100.0;
     }
 
-    throw std::runtime_error("Random next vertex choice failure.");
+//    throw std::runtime_error("Random next vertex choice failure.");
 }
 
 

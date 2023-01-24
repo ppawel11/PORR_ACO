@@ -27,8 +27,9 @@ void Graph::connectNodes(int source_id, int target_id) {
         return;
     }
 
-    edges.push_back(std::make_shared<Edge>(nodes[source_id], nodes[target_id]));
-    edges.push_back(std::make_shared<Edge>(nodes[target_id], nodes[source_id]));
+    int id_ = edges.size();
+    edges.push_back(std::make_shared<Edge>(nodes[source_id], nodes[target_id], id_));
+    edges.push_back(std::make_shared<Edge>(nodes[target_id], nodes[source_id], id_+1));
 }
 
 bool Graph::hasNode(int node_id) const {

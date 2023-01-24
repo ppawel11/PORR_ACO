@@ -4,7 +4,9 @@
 #include "algorithm.h"
 #include <functional>
 
-using PheromoneTable = std::unordered_map<std::shared_ptr<Edge>, float>;
+//using PheromoneTable = std::unordered_map<std::shared_ptr<Edge>, float>;
+
+using PheromoneTable = std::vector<std::pair<std::shared_ptr<Edge>, float>>;
 
 class Ant {
     int count_of_path_resets = 0;

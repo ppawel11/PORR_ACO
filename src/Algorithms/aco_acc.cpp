@@ -69,7 +69,7 @@ Path ACO_ACC::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
                                 if (edge_id == rbeg_id)
                                     continue;
                             }
-                            sum_of_weight += pheromone_table->at(edge) * 100.0;
+                            sum_of_weight += (*pheromone_table)[edge->id].second * 100.0;
                         }
 
 
@@ -84,14 +84,14 @@ Path ACO_ACC::computePath(const std::shared_ptr<Graph> &graph, int server_id, in
                                 }
                             }
 
-                            auto pheromones = pheromone_table->at(edge)*100.0;
+                            auto pheromones = (*pheromone_table)[edge->id].second*100.0;
 
-                            if (random_number < pheromone_table->at(edge) * 100.0) {
+                            if (random_number < (*pheromone_table)[edge->id].second * 100.0) {
                                 next_vertex = edge->target;
     //                            std::cout<<"wybrany nastepny -> "<<next_vertex->id<<std::endl;
                                 break;
                             }
-                            random_number -= pheromone_table->at(edge) * 100.0;
+                            random_number -= (*pheromone_table)[edge->id].second * 100.0;
                         }
 
                         if (next_vertex->id == server_id) {
